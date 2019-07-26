@@ -2,7 +2,7 @@
 title: "Shiny Application and Reproducible Pitch"
 subtitle: "Course Project: Womens World Cup Championship Analysis"
 author: "Felipe Alves"
-date: "7/25/2019"
+date: "7/26/2019"
 output: slidy_presentation
 ---
 
@@ -21,7 +21,7 @@ library(DT)
 
   - The goal of the Project is to develop a Shiny App and to produce a 5 page presentation that explains how the application works and what are its capabilities.
 
-## Dataset:
+# Dataset:
 
   - The Dataset used in the project was provided as part of the TidyTuesday, a social data project in R that provides weekly datasets from the RD4S online learning community.
 
@@ -71,7 +71,7 @@ The shiny app contains two tabs:
 
 2. The second tab contains a dynamic table containing the full dataset. This dataset can be ordered and filtered by the user.
 
-## Shiny App Capabilities
+# Shiny App Capabilities
 
  - The two following slides will display some of the shiny app's capabilities.
 
