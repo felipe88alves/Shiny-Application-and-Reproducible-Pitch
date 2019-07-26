@@ -69,7 +69,7 @@ The shiny app contains two tabs:
         - A dropdown box for selection of a specific Team or all Teams.
         - Checkboxes for the selection of the Tournament round.
 
-2. The second tab contains a dynamic table containing the full dataset. the dataset can be ordered and filtered by the user.
+2. The second tab contains a dynamic table containing the full dataset. This dataset can be ordered and filtered by the user.
 
 ## Shiny App Capabilities
 
@@ -145,7 +145,7 @@ The section below is separated as such:
 <!-- shinyApp( -->
 <!--   ui <- fluidPage( -->
 <!--     # Application title -->
-<!--     # titlePanel("Womens World Cup Data"), # Already present in the Slide Title -->
+<!--     titlePanel("Womens World Cup Data"), -->
 
 <!--     # Sidebar with a slider input for number of bins -->
 <!--     sidebarLayout( -->
@@ -270,6 +270,4 @@ The section below is separated as such:
 <!--   options = list(height = 800) -->
 <!-- ) -->
 <!-- ``` -->
-
-
 
