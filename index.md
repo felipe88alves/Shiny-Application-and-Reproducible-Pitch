@@ -85,8 +85,15 @@ The section below is separated as such:
         - Team: All Teams
         - Tournament Round: (Select All Items)
     - Result: Check the table. Order the Goal Difference from highest to Lowest.
+ 3. In what position did German team finish during the World Cup of 2015?
+    - Widget:
+        - Years: 2015 to 2015
+        - Team: Germany
+        - Tournament Round: (Select All Items)
+    - Result: Check the graph. Find the highest Tournament Round. Check if the team Won of Lost the highest Tournament Round.
 
 --- .class #id 
+
 ## Second Tab - Full Dataset
 
 The section below is separated as such:
