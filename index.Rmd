@@ -1,0 +1,244 @@
+---
+title: "Shiny Application and Reproducible Pitch"
+subtitle: "Course Project: Womens World Cup Championship Analysis"
+author: "Felipe Alves"
+date: "7/25/2019"
+output: slidy_presentation
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(shiny)
+library(tidyverse)
+library(dplyr)
+library(plotly)
+library(DT)
+```
+
+# Goal
+
+  - This presentation was developed as the Course Project of the Developing Data Products course of the John's Hopksins Data Science Specialization, this is an online course hosted in Coursera.
+
+  - The goal of the Project is to develop a Shiny App and to produce a 5 page presentation that explains how the application works and what are its capabilities.
+
+## Dataset:
+
+  - The Dataset used in the project was provided as part of the TidyTuesday, a social data project in R that provides weekly datasets from the RD4S online learning community.
+
+  - The data used contains historical information on the Womens World Cup. It includes the final score and win/loss status data from 1991-2019. The data can be found in the following [Link](https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-07-09).
+
+  - The Shiny application developed for this project allows its user to analyze the chosen dataset.
+
+  - The data was processed so as to individually id each match, to map team acronym with team name and to provide the challenger information for each row. The full processed data can be found in the last slide.
+
+# Data Visualization Project: <br>Women's World Cup Data
+
+The shiny app contains two tabs:
+
+1. The first tab contains:
+    - A Barchart graph enables the visualization of all Game Results separated by Year and Tournament Group.
+    - A dynamic table provides Game Result Statistics for each Selected Team.
+    - The Barchart and the dynamic table can be filtered using the following widgets:
+        - A slider for selection of Year(s).
+        - A dropdown box for selection of a specific Team or all Teams.
+        - Checkboxes for the selection of the Tournament round.
+
+2. The second tab contains a dynamic table containing the full dataset. the dataset can be ordered and filtered by the user.
+
+# Shiny App Capabilities
+
+this slide will display some of the shiny app's capabilities. 
+
+## First Tab - Wins and Losses
+The section below is separated as such:
+ - Question.
+ - Widget instructions on how to reach the answer.
+ - How to interpret the graphs and table to prove the answer.
+ 
+ 1. Who where the winners of the World Cup from 1991 to 2019?
+    - Widget:
+        - Years: 1991 to 2019
+        - Team: All Teams
+        - Tournament Round: Final
+    - Result: Check the graphs for who scored more in the final game of each year
+
+ 2. What team had the highest goal difference during the World Cup of 2015?
+    - Widget:
+        - Years: 2015 to 2015
+        - Team: All Teams
+        - Tournament Round: (Select All Items)
+    - Result: Check the table. Order the Goal Difference from highest to Lowest.
+
+ 3. In what position did German team finish during the World Cup of 2015?
+    - Widget:
+        - Years: 2015 to 2015
+        - Team: Germany
+        - Tournament Round: (Select All Items)
+    - Result: Check the graph. Find the highest Tournament Round. Check if the team Won of Lost the highest Tournament Round.
+
+## Second Tab - Full Dataset
+The section below is separated as such:
+ - Question.
+ - Search bar instructions on how to reach the answer.
+ - How to interpret the table to prove the answer.
+ 
+ 1. What was the result of the Italy vs Germany Womens world cup match of 1999?
+    - Insert the following in the Search Filter:
+        - ITA GER 1999
+    - Result: Check the win_status column for the filtered items.
+
+# Womens World Cup Data
+
+```{r slide_plot, echo=FALSE, message=FALSE, warning=FALSE}
+wwc_outcomes <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-07-09/wwc_outcomes.csv")
+codes <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-07-09/codes.csv")
+
+wwc_outcomes <- wwc_outcomes %>%
+  mutate(
+    year = as.integer(year),
+    yearly_game_id = as.factor(yearly_game_id),
+    game_id = paste(year,yearly_game_id, sep="_")) %>%
+  left_join(codes, by='team')
+  
+wwc_outcomes <- wwc_outcomes %>%
+  group_by(team) %>%
+  mutate(opposing_team = 
+           wwc_outcomes$team[wwc_outcomes$game_id %in% wwc_outcomes$game_id[wwc_outcomes$team == team] &
+                               wwc_outcomes$team!=team],
+         opposing_team_score =
+           wwc_outcomes$score[wwc_outcomes$game_id %in% wwc_outcomes$game_id[wwc_outcomes$team == team] &
+                                wwc_outcomes$team!=team]
+         )
+
+shinyApp(
+  ui <- fluidPage(
+    # Application title
+    # titlePanel("Womens World Cup Data"), # Already present in the Slide Title
+    
+    # Sidebar with a slider input for number of bins
+    sidebarLayout(
+      sidebarPanel(
+        sliderInput("year_input",
+                    "Years",
+                    min = min(wwc_outcomes$year),
+                    max = max(wwc_outcomes$year),
+                    value = c(
+                      min(wwc_outcomes$year),
+                      max(wwc_outcomes$year)),
+                    step = 4,
+                    sep = ""),
+        selectInput("country_input",
+                    "Team:",
+                    choices=c("All Teams",sort(wwc_outcomes$country))),
+        checkboxGroupInput("round_input",
+                           "Tournament Round:",
+                           choices = unique(wwc_outcomes$round),
+                           selected = "Final"),
+        textOutput("sCountry"),
+        tableOutput("sYear"),
+        tableOutput("sRound"),
+        width = 2
+      ),
+      # Show a plot of the generated distribution
+      mainPanel(
+        tabsetPanel(type = "tabs",
+                    tabPanel("Wins and Losses",
+                             br(),
+                             plotlyOutput("plot1"),
+                             h3("Team Statistics"),
+                             dataTableOutput("plot1_summary")),
+                    
+                    tabPanel("Full Dataset",
+                             br(),
+                             dataTableOutput("sWwc"))
+        ),
+        width = 10
+      )
+    )
+
+  ),
+  server <- function(input, output){
+    # collect Input Data
+    yearInput <- reactive({input$year_input})
+    countryInput <- reactive({input$country_input})
+    roundInput <- reactive({input$round_input})
+
+    #output$sYear <- renderTable(yearInput())
+    #output$sCountry <- renderText(countryInput())
+    #output$sRound <- renderTable(roundInput())
+
+    # filter the dataset
+    filtered_data <- reactive({
+      wwc_outcomes %>%
+        filter(
+          round %in% roundInput(),
+          year >= yearInput()[1] & year <= yearInput()[2]
+        )
+    })
+
+    # plot the data and the table
+    output$plot1 <- renderPlotly({
+
+      req(input$round_input,cancelOutput = TRUE)
+
+      if ("All Teams" != countryInput()) {
+        pData <- filter(filtered_data(), game_id %in% filtered_data()$game_id[filtered_data()$country==countryInput()])
+      } else {
+        pData <- filtered_data()
+      }
+
+      # plot the table
+      output$sWwc <- renderDataTable(
+        wwc_outcomes %>%
+          select(-c("yearly_game_id", "team_num", "game_id", "country"))
+        )
+      
+      if ("All Teams" != countryInput()) {
+        tData <- filter(pData, country==countryInput())
+      } else {
+        tData <- pData
+      }
+      
+      output$plot1_summary <- renderDataTable(
+          tData %>%
+            group_by(team) %>%
+            summarize(
+              "Games Played" = n(),
+              "Games Won" = sum(win_status == "Won"),
+              "Draws" = sum(win_status == "Tie"),
+              "Games Lost" = sum(win_status == "Lost"),
+              "Goals For" = as.integer(sum(score)),
+              "Goals Against" = as.integer(sum(opposing_team_score)),
+              "Goal Difference" = as.integer(sum(score) - sum(opposing_team_score)),
+              "Goals per Game" = round(sum(score)/n(), digits = 2)
+            )
+        )
+      
+      # plot the data
+      g <- ggplot(pData, 
+                aes(x=game_id, 
+                    y = score+1, 
+                    fill = win_status, 
+                    text=sprintf("Team: %s<br>Score: %s<br>", country, score)
+                    )
+                ) +
+      geom_bar(stat="identity", position = position_dodge()) +
+      xlab("") + ylab("Score") +
+      facet_grid(. ~ as.factor(year)+round, scales="free_x") +
+      theme(axis.text.x=element_blank(),
+            axis.ticks.x=element_blank()) +
+      scale_y_continuous(labels = function(x) x-1, min = 0)
+      
+      ggplotly(g, tooltip = "text")
+      
+    })
+
+    # TODO: Add a table plot with filtered data (Country ~ Year + Round)
+  },
+  options = list(height = 800)
+)
+```
+
+
+
