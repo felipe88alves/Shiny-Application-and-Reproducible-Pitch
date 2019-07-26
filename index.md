@@ -1,8 +1,7 @@
 ---
 title       : "Shiny Application and Reproducible Pitch"
 subtitle    : "Course Project: Womens World Cup Championship Analysis"
-author      : "Felipe Alves"
-date        : "26/07/2019"
+author      : "Felipe Alves, 26 July 2019"
 framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
 highlighter : highlight.js  # {highlight.js, prettify, highlight}
 hitheme     : tomorrow      # 
